@@ -1,10 +1,10 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MultiStepOnboarding } from "@/components/form-handling/phase-3/multi-step-onboarding";
+import { BasicProfileForm } from "@/components/form-handling/phase-1-basic/basic-profile-form";
 import { Link } from "react-router";
 import { BackToHome } from "@/components/back-to-home-btn";
 
-export default function Phase3Page() {
+export default function Phase1Page() {
     return (
         <div className="min-h-screen bg-muted/30">
             {/* Header */}
@@ -16,9 +16,9 @@ export default function Phase3Page() {
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="font-semibold">Phase 3: Shadcn + Zod + RHF</h1>
+                        <h1 className="font-semibold">Phase 1: Core React Hooks</h1>
                         <p className="text-sm text-muted-foreground">
-                            Production-ready forms with schema validation
+                            useState, useRef, Controlled & Uncontrolled Inputs
                         </p>
                     </div>
                 </div>
@@ -27,8 +27,8 @@ export default function Phase3Page() {
 
             {/* Main Content */}
             <main className="container mx-auto px-4 py-8">
-                <div className="max-w-4xl mx-auto">
-                    <MultiStepOnboarding />
+                <div className="max-w-2xl mx-auto">
+                    <BasicProfileForm />
                 </div>
             </main>
         </div>

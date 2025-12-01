@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
-import { ProfessionalDetailsForm } from "@/components/form-handling/phase-2/professional-details-form";
+import { ProfessionalDetailsForm } from "@/components/form-handling/phase-2-rhf/professional-details-form";
 import { BackToHome } from "@/components/back-to-home-btn";
 
 export default function Phase2Page() {

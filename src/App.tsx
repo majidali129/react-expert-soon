@@ -1,8 +1,7 @@
 import { Route, Routes } from "react-router";
-import { FormHandlingLayout } from "./components/form-handling/layout";
-import Phase1Page from "./pages/form-handling/phase-1-page";
-import Phase2Page from "./pages/form-handling/phase-2-page";
-import Phase3Page from "./pages/form-handling/phase-3-page";
+import Phase1Page from "./pages/form-handling/phase-1-basic-page";
+import Phase2Page from "./pages/form-handling/phase-2-rhf-page";
+import Phase3Page from "./pages/form-handling/phase-3-rhf-zod-shadcn-page";
 import { FormHandlingHomePage } from "./components/form-handling/home-page";
 
 export const App = () => {
