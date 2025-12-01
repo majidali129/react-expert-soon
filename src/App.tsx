@@ -12,7 +12,6 @@ export const App = () => {
             <Route path="phase-1" element={<Phase1Page />} />
             <Route path="phase-2" element={<Phase2Page />} />
             <Route path="phase-3" element={<Phase3Page />} />
-            {/* </Route> */}
         </Routes>
     );
 };
