@@ -24,61 +24,9 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-/**
- * ============================================
- * STEP 2: PROFESSIONAL SETUP
- * ============================================
- *
- * FIELDS TO IMPLEMENT:
- * - Category (discriminated union - different fields based on selection)
- * - Services Offered (dynamic array with Zod validation)
- * - Languages with proficiency level
- *
- * ZOD SCHEMA PATTERN:
- *
- * // Discriminated Union for categories
- * const categorySchema = z.discriminatedUnion("category", [
- *   z.object({
- *     category: z.literal("design"),
- *     figmaProfile: z.string().url().optional(),
- *     dribbbleProfile: z.string().url().optional(),
- *   }),
- *   z.object({
- *     category: z.literal("development"),
- *     githubProfile: z.string().url().optional(),
- *     techStack: z.array(z.string()).min(1),
- *   }),
- *   z.object({
- *     category: z.literal("writing"),
- *     mediumProfile: z.string().url().optional(),
- *     portfolioSamples: z.array(z.string().url()).min(1),
- *   }),
- *   z.object({
- *     category: z.literal("marketing"),
- *     linkedinProfile: z.string().url().optional(),
- *     certifications: z.array(z.string()).optional(),
- *   }),
- * ])
- *
- * // Services Array
- * const serviceSchema = z.object({
- *   name: z.string().min(3, "Service name required"),
- *   description: z.string().min(10, "Description too short"),
- *   price: z.number().min(5, "Minimum price is $5"),
- *   deliveryDays: z.number().min(1).max(90),
- * })
- *
- * const servicesSchema = z.array(serviceSchema)
- *   .min(1, "Add at least one service")
- *   .max(5, "Maximum 5 services")
- *
- * // Languages
- * const languageSchema = z.object({
- *   language: z.string(),
- *   proficiency: z.enum(["basic", "conversational", "fluent", "native"]),
- * })
- */
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import z from "zod";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 const categories = [
     {
@@ -127,25 +75,70 @@ const proficiencyLevels = [
     { value: "native", label: "Native" },
 ];
 
+const categorySchema = z.discriminatedUnion("category", [
+    z.object({
+        category: z.literal("design"),
+        figmaProfile: z.url("Invali url").optional(),
+        dribbbleProfile: z.url("Invali url").optional(),
+    }),
+    z.object({
+        category: z.literal("development"),
+        githubProfile: z.url("Invali url").optional(),
+        techStack: z.array(z.string()).min(1),
+    }),
+    z.object({
+        category: z.literal("writing"),
+        mediumProfile: z.url("Invali url").optional(),
+        portfolioSamples: z.array(z.url("Invali url")).min(1),
+    }),
+    z.object({
+        category: z.literal("marketing"),
+        linkedinProfile: z.url("Invali url").optional(),
+        certifications: z.array(z.string()).optional(),
+    }),
+]);
+
+const serviceSchema = z.object({
+    name: z.string().min(3, "Service name required"),
+    description: z.string().min(10, "Description too short"),
+    price: z.number().min(5, "Minimum price is $5"),
+    deliveryDays: z.number().min(1, "Can't below 1").max(90),
+});
+
+const servicesSchema = z
+    .array(serviceSchema)
+    .min(1, "Add at least one service")
+    .max(5, "Maximum 5 services");
+
+const languageSchema = z.object({
+    language: z.string().min(1, "Please choose a language"),
+    proficiency: z.enum(["basic", "conversational", "fluent", "native"], {
+        error: "Select your proficiency level",
+    }),
+});
+
+export const step2Schema = z.object({
+    categoryInfo: categorySchema, // discriminated union
+    services: servicesSchema, // array of services
+    languageInfo: languageSchema,
+});
+
+export type Step2Types = z.infer<typeof step2Schema>;
+
 export const ProfessionalSetupStep = () => {
     // TODO: Use useFormContext
-    // const form = useFormContext()
+    const form = useFormContext();
 
-    // TODO: Use useFieldArray for services
-    // const { fields: serviceFields, append: appendService, remove: removeService } = useFieldArray({
-    //   control: form.control,
-    //   name: "services"
-    // })
+    const {
+        fields: serviceFields,
+        append: appendService,
+        remove: removeService,
+    } = useFieldArray({
+        control: form.control,
+        name: "services",
+    });
 
-    // TODO: Use useWatch for category to show category-specific fields
-    // const selectedCategory = useWatch({ control: form.control, name: "category" })
-
-    const selectedCategory = null; // Placeholder
-
-    // Placeholder services - replace with useFieldArray
-    const serviceFields = [
-        { id: "1", name: "", description: "", price: "", deliveryDays: "" },
-    ];
+    const selectedCategory = form.watch("categoryInfo.category");
 
     return (
         <div className="space-y-6">
@@ -174,10 +167,9 @@ export const ProfessionalSetupStep = () => {
                         >
                             <input
                                 type="radio"
-                                name="category"
                                 value={category.value}
                                 className="sr-only"
-                                // TODO: {...register("category")}
+                                {...form.register("categoryInfo.category")}
                             />
                             <div className={cn("p-2 rounded-lg", category.color)}>
                                 <category.icon className="h-5 w-5" />
@@ -189,8 +181,8 @@ export const ProfessionalSetupStep = () => {
                 {/* TODO: <FormMessage /> */}
             </div>
 
-            {/* Category-Specific Fields - CONDITIONAL RENDERING */}
-            {/* TODO: Show different fields based on selectedCategory */}
+            {/* //?Category-Specific Fields - CONDITIONAL RENDERING */}
+            {/* //TODO: Show different fields based on selectedCategory */}
             {selectedCategory === "design" && (
                 <div className="p-4 border rounded-lg bg-pink-500/5 space-y-4">
                     <p className="text-sm font-medium text-pink-600">
@@ -198,11 +190,17 @@ export const ProfessionalSetupStep = () => {
                     </p>
                     <div className="space-y-2">
                         <Label>Figma Profile URL</Label>
-                        <Input placeholder="https://figma.com/@username" />
+                        <Input
+                            placeholder="https://figma.com/@username"
+                            {...form.register("categoryInfo.figmaProfile")}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Dribbble Profile URL</Label>
-                        <Input placeholder="https://dribbble.com/username" />
+                        <Input
+                            placeholder="https://dribbble.com/username"
+                            {...form.register("categoryInfo.dribbbleProfile")}
+                        />
                     </div>
                 </div>
             )}
@@ -214,17 +212,106 @@ export const ProfessionalSetupStep = () => {
                     </p>
                     <div className="space-y-2">
                         <Label>GitHub Profile URL</Label>
-                        <Input placeholder="https://github.com/username" />
+                        <Input
+                            placeholder="https://github.com/username"
+                            {...form.register("categoryInfo.githubProfile")}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Primary Tech Stack</Label>
                         {/* TODO: Multi-select for tech stack */}
-                        <Input placeholder="React, Node.js, TypeScript..." />
+                        <Controller
+                            name="categoryInfo.techStack"
+                            control={form.control}
+                            render={({ field }) => (
+                                <Input
+                                    placeholder="React, Node.js, TypeScript..."
+                                    value={field.value.join(", ")}
+                                    onChange={(e) =>
+                                        field.onChange(
+                                            e.target.value
+                                                .split(",")
+                                                .map((v) => v.trim()),
+                                        )
+                                    }
+                                />
+                            )}
+                        />
+                    </div>
+                </div>
+            )}
+            {selectedCategory === "writing" && (
+                <div className="p-4 border rounded-lg bg-orange-500/5 space-y-4">
+                    <p className="text-sm font-medium text-orange-600">
+                        Writing-specific fields
+                    </p>
+                    <div className="space-y-2">
+                        <Label>Medium Profile URL</Label>
+                        <Input
+                            placeholder="https://medium.com/username"
+                            {...form.register("categoryInfo.mediumProfile")}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Portfolio Samples (comma separated URLs)</Label>
+                        {/* TODO: Multi-select for tech stack */}
+                        <Controller
+                            name="categoryInfo.portfolioSamples"
+                            control={form.control}
+                            render={({ field }) => (
+                                <Input
+                                    value={field?.value?.join(", ")}
+                                    onChange={(e) =>
+                                        field.onChange(
+                                            e.target.value
+                                                .split(",")
+                                                .map((v) => v.trim()),
+                                        )
+                                    }
+                                    placeholder="https://portfolio.com/sample1, https://portfolio.com/sample2"
+                                />
+                            )}
+                        />
+                    </div>
+                </div>
+            )}
+            {selectedCategory === "marketing" && (
+                <div className="p-4 border rounded-lg bg-green-500/5 space-y-4">
+                    <p className="text-sm font-medium text-green-600">
+                        Marketing-specific fields
+                    </p>
+                    <div className="space-y-2">
+                        <Label>Linkedin Profile URL</Label>
+                        <Input
+                            placeholder="https://linkedin.com/username"
+                            {...form.register("categoryInfo.linkedinProfile")}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Certifications (comma separated)</Label>
+                        <Controller
+                            name="categoryInfo.certifications"
+                            control={form.control}
+                            render={({ field }) => (
+                                <Input
+                                    value={field.value?.join(",")}
+                                    onChange={(e) =>
+                                        field.onChange(
+                                            e.target.value
+                                                ? e.target?.value
+                                                      .split(",")
+                                                      .map((v) => v.trim())
+                                                : [],
+                                        )
+                                    }
+                                />
+                            )}
+                        />
                     </div>
                 </div>
             )}
 
-            {/* Show placeholder when no category selected */}
+            {/* //? Show placeholder when no category selected */}
             {!selectedCategory && (
                 <div className="p-4 border border-dashed rounded-lg text-center text-muted-foreground">
                     <p className="text-sm">Select a category to see additional fields</p>
@@ -247,7 +334,14 @@ export const ProfessionalSetupStep = () => {
                         variant="outline"
                         size="sm"
                         disabled={serviceFields.length >= 5}
-                        // TODO: onClick={() => appendService({ name: '', description: '', price: '', deliveryDays: '' })}
+                        onClick={() =>
+                            appendService({
+                                name: "",
+                                description: "",
+                                price: "",
+                                deliveryDays: "",
+                            })
+                        }
                     >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Service
@@ -266,7 +360,7 @@ export const ProfessionalSetupStep = () => {
                                     variant="ghost"
                                     size="icon"
                                     className="absolute right-2 top-2 h-8 w-8 text-muted-foreground hover:text-destructive"
-                                    // TODO: onClick={() => removeService(index)}
+                                    onClick={() => removeService(index)}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -278,56 +372,149 @@ export const ProfessionalSetupStep = () => {
 
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2 md:col-span-2">
-                                    <Label>Service Name</Label>
-                                    <Input
-                                        placeholder="e.g., Logo Design, Website Development"
-                                        // TODO: {...register(`services.${index}.name`)}
+                                    <Controller
+                                        name={`services.${index}.name`}
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field
+                                                data-invalid={fieldState.invalid}
+                                                className="gap-1"
+                                            >
+                                                <FieldLabel htmlFor="service-name">
+                                                    Service Name
+                                                </FieldLabel>
+                                                <Input
+                                                    {...field}
+                                                    placeholder="e.g., Logo Design, Website Development"
+                                                />
+                                                {fieldState.error && (
+                                                    <FieldError
+                                                        errors={[fieldState.error]}
+                                                    />
+                                                )}
+                                            </Field>
+                                        )}
                                     />
-                                    {/* TODO: Show error for services.${index}.name */}
                                 </div>
 
                                 <div className="space-y-2 md:col-span-2">
-                                    <Label>Description</Label>
-                                    <Textarea
-                                        placeholder="Describe what's included in this service..."
-                                        className="resize-none"
-                                        rows={3}
-                                        // TODO: {...register(`services.${index}.description`)}
+                                    <Controller
+                                        name={`services.${index}.description`}
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field
+                                                data-invalid={fieldState.invalid}
+                                                className="gap-1"
+                                            >
+                                                <FieldLabel htmlFor="service-description">
+                                                    Description
+                                                </FieldLabel>
+                                                <Textarea
+                                                    {...field}
+                                                    id="service-description"
+                                                    placeholder="Describe what's included in this service..."
+                                                    className="resize-none"
+                                                    rows={3}
+                                                    {...form.register(
+                                                        `services.${index}.description`,
+                                                    )}
+                                                />
+                                                {fieldState.error && (
+                                                    <FieldError
+                                                        errors={[fieldState.error]}
+                                                    />
+                                                )}
+                                            </Field>
+                                        )}
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Price (USD)</Label>
-                                    <div className="relative">
-                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            type="number"
-                                            placeholder="50"
-                                            className="pl-10"
-                                            // TODO: {...register(`services.${index}.price`, { valueAsNumber: true })}
-                                        />
-                                    </div>
+                                    <Controller
+                                        name={`services.${index}.price`}
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field
+                                                data-invalid={fieldState.invalid}
+                                                className="gap-1"
+                                            >
+                                                <FieldLabel htmlFor="price">
+                                                    {" "}
+                                                    Price (USD)
+                                                </FieldLabel>
+                                                <div className="relative">
+                                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                    <Input
+                                                        {...field}
+                                                        aria-invalid={fieldState.invalid}
+                                                        type="number"
+                                                        onChange={(e) =>
+                                                            field.onChange(
+                                                                parseInt(
+                                                                    e.target.value,
+                                                                    10,
+                                                                ),
+                                                            )
+                                                        }
+                                                        placeholder="50"
+                                                        className="pl-10"
+                                                    />
+                                                </div>
+                                                {fieldState.invalid && (
+                                                    <FieldError
+                                                        errors={[fieldState.error]}
+                                                    />
+                                                )}
+                                            </Field>
+                                        )}
+                                    />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Delivery Time (days)</Label>
-                                    <div className="relative">
-                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            type="number"
-                                            placeholder="7"
-                                            className="pl-10"
-                                            min={1}
-                                            max={90}
-                                            // TODO: {...register(`services.${index}.deliveryDays`, { valueAsNumber: true })}
-                                        />
-                                    </div>
+                                    <Controller
+                                        name={`services.${index}.deliveryDays`}
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <Field
+                                                data-invalid={fieldState.invalid}
+                                                className="gap-1"
+                                            >
+                                                <FieldLabel htmlFor="price">
+                                                    {" "}
+                                                    Delivery Days
+                                                </FieldLabel>
+                                                <div className="relative">
+                                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                    <Input
+                                                        {...field}
+                                                        onChange={(e) =>
+                                                            field.onChange(
+                                                                parseInt(
+                                                                    e.target.value,
+                                                                    10,
+                                                                ),
+                                                            )
+                                                        }
+                                                        type="number"
+                                                        placeholder="7"
+                                                        className="pl-10"
+                                                        min={1}
+                                                        max={90}
+                                                    />
+                                                </div>
+                                                {fieldState.invalid && (
+                                                    <FieldError
+                                                        errors={[fieldState.error]}
+                                                    />
+                                                )}
+                                            </Field>
+                                        )}
+                                    />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
-                {/* TODO: Show array-level error (min 1 service) */}
             </div>
 
             {/* Languages */}
@@ -341,34 +528,90 @@ export const ProfessionalSetupStep = () => {
                     {/* Add more language rows dynamically */}
                     <div className="flex gap-3 items-end">
                         <div className="flex-1 space-y-2">
-                            <Label className="text-xs">Language</Label>
-                            <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select language" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {languages.map((lang) => (
-                                        <SelectItem key={lang} value={lang.toLowerCase()}>
-                                            {lang}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Controller
+                                name="languageInfo.language"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field
+                                        data-invalid={fieldState.invalid}
+                                        className="text-sm gap-1"
+                                    >
+                                        <FieldLabel
+                                            htmlFor="language"
+                                            className="text-sm"
+                                        >
+                                            Language
+                                            <span className="text-destructive">*</span>
+                                        </FieldLabel>
+                                        <Select
+                                            {...form.register("languageInfo.language")}
+                                            onValueChange={(value) =>
+                                                field.onChange(value)
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select language" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {languages.map((lang) => (
+                                                    <SelectItem
+                                                        key={lang}
+                                                        value={lang.toLowerCase()}
+                                                    >
+                                                        {lang}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
                         </div>
                         <div className="flex-1 space-y-2">
-                            <Label className="text-xs">Proficiency</Label>
-                            <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Level" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {proficiencyLevels.map((level) => (
-                                        <SelectItem key={level.value} value={level.value}>
-                                            {level.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Controller
+                                name="languageInfo.proficiency"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field
+                                        data-invalid={fieldState.invalid}
+                                        className="text-sm gap-1"
+                                    >
+                                        <FieldLabel
+                                            htmlFor="proficiency"
+                                            className="text-sm"
+                                        >
+                                            Proficiency
+                                            <span className="text-destructive">*</span>
+                                        </FieldLabel>
+                                        <Select
+                                            {...form.register("languageInfo.proficiency")}
+                                            onValueChange={(value) =>
+                                                field.onChange(value)
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select proficiency" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {proficiencyLevels.map((level) => (
+                                                    <SelectItem
+                                                        key={level.value}
+                                                        value={level.value}
+                                                    >
+                                                        {level.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
                         </div>
                         <Button type="button" variant="outline" size="icon">
                             <Plus className="h-4 w-4" />
@@ -378,8 +621,13 @@ export const ProfessionalSetupStep = () => {
                     {/* TODO: Show added languages as badges */}
                     <div className="flex flex-wrap gap-2 pt-2">
                         <Badge variant="secondary" asChild>
-                            English (Native)
-                            <Button className="ml-1 hover:text-destructive" />
+                            <div>
+                                English (Native)
+                                <Button
+                                    className="ml-1 hover:text-destructive"
+                                    size="sm"
+                                />
+                            </div>
                         </Badge>
                     </div>
                 </div>

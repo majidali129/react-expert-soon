@@ -17,61 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-/**
- * ============================================
- * STEP 4: REVIEW & SUBMIT
- * ============================================
- *
- * YOUR TASKS:
- * - Display all collected form data
- * - Allow editing by jumping to specific steps
- * - Show validation summary
- * - Handle final submission
- *
- * IMPLEMENTATION:
- * - Use useFormContext to access all form data
- * - Create edit buttons that call setStep() to jump back
- * - Show loading state during submission
- * - Handle success/error responses
- *
- * BONUS:
- * - Transform data before submission using Zod
- * - Add confirmation modal before submit
- * - Show submission progress
- */
+import { useFormContext } from "react-hook-form";
+import type { StepsFormData } from "../multi-step-onboarding";
 
 export const ReviewStep = () => {
-    // TODO: Use useFormContext to get all form data
-    // const form = useFormContext()
-    // const formData = form.watch()
-
-    // Placeholder data - replace with actual form data
-    const formData = {
-        username: "johndoe",
-        displayName: "John Doe",
-        email: "john@example.com",
-        phone: { countryCode: "+1", number: "(555) 123-4567" },
-        address: {
-            street: "123 Main St",
-            city: "San Francisco",
-            state: "California",
-            zip: "94102",
-            country: "United States",
-        },
-        category: "development",
-        services: [
-            { name: "Website Development", price: 500, deliveryDays: 7 },
-            { name: "API Integration", price: 300, deliveryDays: 5 },
-        ],
-        languages: [{ language: "English", proficiency: "native" }],
-        payment: { method: "stripe" },
-    };
-
-    // TODO: Implement jump to step function
-    // const jumpToStep = (step: number) => {
-    //   setCurrentStep(step)
-    // }
+    const form = useFormContext();
+    const formData = form.watch();
 
     const Section = ({
         title,
@@ -157,44 +108,43 @@ export const ReviewStep = () => {
                         <Briefcase className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Category:</span>
                         <Badge variant="secondary" className="capitalize">
-                            {formData.category}
+                            {formData.categoryInfo.category}
                         </Badge>
                     </div>
 
                     <div>
                         <p className="text-muted-foreground mb-2">Services Offered:</p>
                         <div className="grid gap-2">
-                            {formData.services.map((service) => (
-                                <div
-                                    key={service.name}
-                                    className="flex items-center justify-between p-2 bg-background rounded"
-                                >
-                                    <span className="font-medium">{service.name}</span>
-                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                        <span className="flex items-center gap-1">
-                                            <DollarSign className="h-3 w-3" />
-                                            {service.price}
+                            {formData.services.map(
+                                (service: StepsFormData["services"][number]) => (
+                                    <div
+                                        key={service.name}
+                                        className="flex items-center justify-between p-2 bg-background rounded"
+                                    >
+                                        <span className="font-medium">
+                                            {service.name}
                                         </span>
-                                        <span>{service.deliveryDays} days</span>
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                            <span className="flex items-center gap-1">
+                                                <DollarSign className="h-3 w-3" />
+                                                {service.price}
+                                            </span>
+                                            <span>{service.deliveryDays} days</span>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ),
+                            )}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Languages className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Languages:</span>
+                        <span className="text-muted-foreground">Language:</span>
                         <div className="flex gap-1">
-                            {formData.languages.map((lang) => (
-                                <Badge
-                                    key={lang.language}
-                                    variant="outline"
-                                    className="text-xs"
-                                >
-                                    {lang.language} ({lang.proficiency})
-                                </Badge>
-                            ))}
+                            <Badge variant="outline" className="text-xs">
+                                {formData.languageInfo.language} (
+                                {formData.languageInfo.proficiency})
+                            </Badge>
                         </div>
                     </div>
                 </div>

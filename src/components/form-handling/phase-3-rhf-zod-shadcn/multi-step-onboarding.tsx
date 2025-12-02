@@ -1,5 +1,3 @@
-"use client";
-
 import {
     User,
     Briefcase,
@@ -12,90 +10,25 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PersonalInfoStep } from "./steps/personal-info-step";
-import { ProfessionalSetupStep } from "./steps/professional-setup-step";
-import { VerificationStep } from "./steps/verification-step";
+import {
+    step1Schema,
+    PersonalInfoStep,
+    type Step1Types,
+} from "./steps/personal-info-step";
+import {
+    ProfessionalSetupStep,
+    step2Schema,
+    type Step2Types,
+} from "./steps/professional-setup-step";
+import {
+    step3Schema,
+    VerificationStep,
+    type Step3Types,
+} from "./steps/verification-step";
 import { ReviewStep } from "./steps/review-step";
-
-/**
- * ============================================
- * PHASE 3: MULTI-STEP ONBOARDING FORM
- * ============================================
- *
- * YOUR TASKS:
- *
- * 1. ZOD SCHEMA SETUP:
- *    - Create schema for each step
- *    - Use z.object, z.array, z.enum, z.union
- *    - Add refinements for cross-field validation
- *    - Use transforms for data cleanup
- *
- * 2. ZODRESOLVER INTEGRATION:
- *    - Connect Zod schema to React Hook Form
- *    - Handle step-specific validation
- *    - Type inference from schema
- *
- * 3. MULTI-STEP NAVIGATION:
- *    - Validate current step before proceeding
- *    - Preserve data when navigating back
- *    - Allow jumping to previous steps
- *
- * 4. SHADCN FORM COMPONENTS:
- *    - FormField, FormItem, FormLabel, FormControl, FormMessage
- *    - Proper error display
- *    - Accessible form structure
- *
- * 5. ADVANCED ZOD PATTERNS:
- *    - Discriminated unions (different fields per category)
- *    - Async validation (username check)
- *    - Conditional validation
- *    - Nested object validation
- *
- * SCHEMA EXAMPLES:
- *
- * // Basic schema
- * const step1Schema = z.object({
- *   username: z.string().min(3).max(20),
- *   email: z.string().email(),
- *   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/),
- *   address: z.object({
- *     street: z.string().min(1),
- *     city: z.string().min(1),
- *     zip: z.string().min(5),
- *   }),
- * })
- *
- * // With refinement
- * const passwordSchema = z.object({
- *   password: z.string().min(8),
- *   confirmPassword: z.string(),
- * }).refine((data) => data.password === data.confirmPassword, {
- *   message: "Passwords don't match",
- *   path: ["confirmPassword"],
- * })
- *
- * // Discriminated union
- * const categorySchema = z.discriminatedUnion("category", [
- *   z.object({ category: z.literal("design"), figmaUrl: z.string().url() }),
- *   z.object({ category: z.literal("development"), githubUrl: z.string().url() }),
- * ])
- *
- * // Array with validation
- * const servicesSchema = z.array(
- *   z.object({
- *     name: z.string().min(1),
- *     price: z.number().min(5),
- *   })
- * ).min(1, "Add at least one service")
- *
- * // Async validation (use superRefine)
- * const usernameSchema = z.string().superRefine(async (val, ctx) => {
- *   const isAvailable = await checkUsername(val)
- *   if (!isAvailable) {
- *     ctx.addIssue({ code: "custom", message: "Username taken" })
- *   }
- * })
- */
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const steps = [
     { id: 1, title: "Personal Info", icon: User },
@@ -104,32 +37,88 @@ const steps = [
     { id: 4, title: "Review", icon: CheckCircle2 },
 ];
 
+export type StepsFormData = Step1Types & Step2Types & Step3Types;
+const stepsCombinedSchema = step1Schema
+    .extend(step2Schema.shape)
+    .extend(step3Schema.shape);
+const combinedDefaults: StepsFormData = {
+    username: "",
+    displayName: "",
+    email: "",
+    phone: {
+        countryCode: "",
+        number: "",
+    },
+    address: {
+        street: "",
+        city: "",
+        state: "",
+        zip: "",
+        country: "",
+    },
+    categoryInfo: {
+        category: "development",
+        githubProfile: "",
+        techStack: [],
+    },
+    services: [{ name: "", description: "", price: 5, deliveryDays: 1 }],
+    languageInfo: {
+        language: "",
+        proficiency: "basic",
+    },
+    governmentId: null,
+    videoUrl: "",
+    socialLinks: {
+        dribbble: "",
+        github: "",
+        linkedin: "",
+        twitter: "",
+    },
+    payment: {
+        method: "paypal",
+        paypalEmail: "",
+    },
+};
+const stepFields: Record<number, (keyof StepsFormData)[]> = {
+    1: ["username", "displayName", "email", "phone", "address"],
+    2: ["categoryInfo", "services", "languageInfo"],
+    3: ["governmentId", "videoUrl", "socialLinks", "payment"],
+};
 export const MultiStepOnboarding = () => {
-    // TODO: Setup state for current step
-    // const [currentStep, setCurrentStep] = useState(1)
-    const currentStep: number = 1; // Placeholder
+    const [currentStep, setCurrentStep] = useState(1);
 
-    // TODO: Setup useForm with zodResolver
-    // const form = useForm<z.infer<typeof fullSchema>>({
-    //   resolver: zodResolver(currentStepSchema),
-    //   defaultValues: {...}
-    // })
+    const methods = useForm<StepsFormData>({
+        resolver: zodResolver(stepsCombinedSchema),
+        defaultValues: combinedDefaults,
+        mode: "onChange",
+    });
 
-    // TODO: Create combined schema or per-step schemas
-    // const step1Schema = z.object({...})
-    // const step2Schema = z.object({...})
-    // const step3Schema = z.object({...})
+    const { getValues, watch } = methods;
 
-    // TODO: Handle step navigation
-    // const nextStep = async () => {
-    //   const isValid = await form.trigger()
-    //   if (isValid) setCurrentStep(prev => prev + 1)
-    // }
-    // const prevStep = () => setCurrentStep(prev => prev - 1)
+    console.log(getValues());
+    console.log(watch());
+    console.log(stepFields);
 
-    // TODO: Handle final submission
-    // const onSubmit = async (data) => {...}
+    const handleNext = async () => {
+        const fieldToValidate = stepFields[currentStep];
+        console.log(fieldToValidate);
+        const isStepValid = await methods.trigger(fieldToValidate);
+        if (isStepValid) {
+            console.log(`Data after step ${currentStep}:`, getValues());
+            if (currentStep === steps.length) return;
+            setCurrentStep((prev) => prev + 1);
+        } else return;
+    };
 
+    const handlePrevStep = () => {
+        if (currentStep === 1) return;
+        setCurrentStep((prev) => prev - 1);
+    };
+
+    const onSubmit = (data: StepsFormData) => {
+        console.log(data);
+    };
+    console.log(methods.formState.errors);
     const renderStep = () => {
         switch (currentStep) {
             case 1:
@@ -144,6 +133,8 @@ export const MultiStepOnboarding = () => {
                 return null;
         }
     };
+
+    console.log(currentStep);
 
     return (
         <div className="space-y-8">
@@ -164,13 +155,15 @@ export const MultiStepOnboarding = () => {
                             key={step.id}
                             type="button"
                             className={cn(
-                                "flex flex-col items-center gap-2",
+                                "flex flex-col items-center gap-2 not-disabled:cursor-pointer",
                                 step.id <= currentStep
                                     ? "text-primary"
                                     : "text-muted-foreground",
                             )}
                             // TODO: Allow clicking to go back to previous steps
-                            // onClick={() => step.id < currentStep && setCurrentStep(step.id)}
+                            onClick={() =>
+                                step.id < currentStep && setCurrentStep(step.id)
+                            }
                             disabled={step.id > currentStep}
                         >
                             <div
@@ -178,7 +171,8 @@ export const MultiStepOnboarding = () => {
                                     "w-10 h-10 rounded-full flex items-center justify-center border-2 bg-background transition-colors",
                                     step.id < currentStep &&
                                         "bg-primary border-primary text-primary-foreground",
-                                    step.id === currentStep && "border-primary",
+                                    step.id === currentStep &&
+                                        "border-primary bg-teal-600",
                                     step.id > currentStep && "border-muted",
                                 )}
                             >
@@ -198,54 +192,47 @@ export const MultiStepOnboarding = () => {
 
             {/* Form Content */}
             {/* TODO: Wrap with FormProvider */}
-            {/* <FormProvider {...form}> */}
-            <Card>
-                <CardContent className="pt-6">
-                    {/* TODO: Wrap with form element */}
-                    {/* <form onSubmit={form.handleSubmit(onSubmit)}> */}
-                    {renderStep()}
+            <FormProvider {...methods}>
+                <Card>
+                    <CardContent className="pt-6">
+                        {/* TODO: Wrap with form element */}
+                        <form onSubmit={methods.handleSubmit(onSubmit)}>
+                            {renderStep()}
 
-                    {/* Navigation Buttons */}
-                    <div className="flex justify-between mt-8 pt-6 border-t">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            disabled={currentStep === 1}
-                            // TODO: onClick={prevStep}
-                        >
-                            <ChevronLeft className="h-4 w-4 mr-2" />
-                            Previous
-                        </Button>
+                            {/* Navigation Buttons */}
+                            <div className="flex justify-between mt-8 pt-6 border-t">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={currentStep === 1}
+                                    onClick={handlePrevStep}
+                                >
+                                    <ChevronLeft className="h-4 w-4 mr-2" />
+                                    Previous
+                                </Button>
 
-                        {currentStep < 4 ? (
-                            <Button
-                                type="button"
-                                // TODO: onClick={nextStep}
-                            >
-                                Next Step
-                                <ChevronRight className="h-4 w-4 ml-2" />
-                            </Button>
-                        ) : (
-                            <Button
-                                type="submit"
-                                // TODO: disabled={form.formState.isSubmitting}
-                            >
-                                {/* TODO: Show loading state */}
-                                {currentStep === 4 ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Submitting...
-                                    </>
+                                {currentStep < 4 ? (
+                                    <Button type="button" onClick={handleNext}>
+                                        Next Step
+                                        <ChevronRight className="h-4 w-4 ml-2" />
+                                    </Button>
                                 ) : (
-                                    "Complete Registration"
+                                    <Button type="submit">
+                                        {currentStep === 4 ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                Submitting...
+                                            </>
+                                        ) : (
+                                            "Complete Registration"
+                                        )}
+                                    </Button>
                                 )}
-                            </Button>
-                        )}
-                    </div>
-                    {/* </form> */}
-                </CardContent>
-            </Card>
-            {/* </FormProvider> */}
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
+            </FormProvider>
 
             {/* Debug Panel */}
             <Card className="bg-muted/50">
@@ -257,15 +244,13 @@ export const MultiStepOnboarding = () => {
                         <div>
                             <p className="text-xs font-medium mb-1">Form Values:</p>
                             <pre className="text-xs overflow-auto max-h-40 p-2 bg-background rounded">
-                                {/* TODO: JSON.stringify(form.watch(), null, 2) */}
-                                {`{}`}
+                                {JSON.stringify(watch(), null, 2)}
                             </pre>
                         </div>
                         <div>
                             <p className="text-xs font-medium mb-1">Errors:</p>
                             <pre className="text-xs overflow-auto max-h-40 p-2 bg-background rounded text-destructive">
-                                {/* TODO: JSON.stringify(form.formState.errors, null, 2) */}
-                                {`{}`}
+                                {/* {JSON.stringify(methods.formState.errors, null, 2)} */}
                             </pre>
                         </div>
                     </div>

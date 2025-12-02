@@ -14,63 +14,73 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import z from "zod";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
-/**
- * ============================================
- * STEP 3: VERIFICATION
- * ============================================
- *
- * FIELDS TO IMPLEMENT:
- * - Government ID upload (file validation)
- * - Profile video URL (YouTube/Vimeo validation)
- * - Social Links (conditional based on category from step 2)
- * - Payment method selection
- *
- * ZOD SCHEMA PATTERNS:
- *
- * // File validation (client-side)
- * const fileSchema = z.instanceof(File)
- *   .refine((file) => file.size <= 5 * 1024 * 1024, "File must be less than 5MB")
- *   .refine((file) => ["image/jpeg", "image/png", "application/pdf"].includes(file.type), "Invalid file type")
- *
- * // URL with specific domains
- * const videoUrlSchema = z.string()
- *   .url("Invalid URL")
- *   .refine(
- *     (url) => url.includes("youtube.com") || url.includes("vimeo.com") || url.includes("loom.com"),
- *     "Only YouTube, Vimeo, or Loom links accepted"
- *   )
- *   .optional()
- *
- * // Conditional required based on category (use superRefine)
- * const socialLinksSchema = z.object({
- *   twitter: z.string().url().optional(),
- *   linkedin: z.string().url().optional(),
- *   github: z.string().url().optional(),
- *   dribbble: z.string().url().optional(),
- * }).superRefine((data, ctx) => {
- *   // At least one social link required
- *   if (!data.twitter && !data.linkedin && !data.github && !data.dribbble) {
- *     ctx.addIssue({
- *       code: "custom",
- *       message: "At least one social link is required",
- *       path: ["twitter"], // Show error on first field
- *     })
- *   }
- * })
- *
- * // Payment method
- * const paymentSchema = z.object({
- *   method: z.enum(["stripe", "paypal", "bank"]),
- *   // Conditional fields based on method
- * }).and(
- *   z.discriminatedUnion("method", [
- *     z.object({ method: z.literal("bank"), accountNumber: z.string().min(10), routingNumber: z.string().length(9) }),
- *     z.object({ method: z.literal("paypal"), paypalEmail: z.string().email() }),
- *     z.object({ method: z.literal("stripe") }), // No additional fields needed
- *   ])
- * )
- */
+// ? File validation (client-side)
+
+const fileSchema = z.union([z.instanceof(File), z.literal(null)], {
+    error: "Verification document is required.",
+});
+
+const videoUrlSchema = z
+    .url()
+    .refine(
+        (url) =>
+            url.includes("youtube.com") ||
+            url.includes("vimeo.com") ||
+            url.includes("loom.com"),
+        "Only YouTube, Vimeo, or Loom links accepted",
+    );
+
+// Conditional required based on category (use superRefine)
+const socialLinksSchema = z
+    .object({
+        twitter: z.url(),
+        linkedin: z.url(),
+        github: z.url(),
+        dribbble: z.url(),
+    })
+    .superRefine((data, ctx) => {
+        // At least one social link required
+        if (!data.twitter && !data.linkedin && !data.github && !data.dribbble) {
+            ctx.addIssue({
+                code: "custom",
+                message: "At least one social link is required",
+                path: ["twitter"], // Show error on first field
+            });
+        }
+    });
+
+// Payment method
+const paymentSchema = z.discriminatedUnion("method", [
+    z.object({
+        method: z.literal("bank"),
+        accountNumber: z
+            .string()
+            .min(10, "Account number is required. Must be 10 characters long"),
+        routingNumber: z
+            .string()
+            .min(9, "Routing number must be 9 characters long")
+            .length(9),
+    }),
+    z.object({
+        method: z.literal("paypal"),
+        paypalEmail: z.email("Invali email"),
+        // .refine((email) => email === "", "Email required"),
+    }),
+    z.object({ method: z.literal("stripe") }),
+]);
+
+export const step3Schema = z.object({
+    governmentId: fileSchema,
+    videoUrl: videoUrlSchema,
+    socialLinks: socialLinksSchema,
+    payment: paymentSchema,
+});
+
+export type Step3Types = z.infer<typeof step3Schema>;
 
 const paymentMethods = [
     { value: "stripe", label: "Stripe", description: "Instant payouts to your bank" },
@@ -106,16 +116,9 @@ const socialLinks = [
 ];
 
 export const VerificationStep = () => {
-    // TODO: Use useFormContext
-    // const form = useFormContext()
+    const form = useFormContext();
 
-    // TODO: Watch category from step 2 to show relevant social links
-    // const category = useWatch({ control: form.control, name: "category" })
-
-    // TODO: Watch payment method for conditional fields
-    // const paymentMethod = useWatch({ control: form.control, name: "payment.method" })
-
-    const paymentMethod = null; // Placeholder
+    const paymentMethod = useWatch({ control: form.control, name: "payment.method" });
 
     return (
         <div className="space-y-6">
@@ -128,38 +131,55 @@ export const VerificationStep = () => {
 
             {/* Government ID Upload */}
             <div className="space-y-2">
-                <Label>
-                    Government ID <span className="text-destructive">*</span>
-                </Label>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                    <input
-                        type="file"
-                        accept="image/*,.pdf"
-                        className="hidden"
-                        id="governmentId"
-                        // TODO: Register with validation
-                    />
-                    <label
-                        htmlFor="governmentId"
-                        className="cursor-pointer flex flex-col items-center gap-2"
-                    >
-                        <div className="p-3 rounded-full bg-muted">
-                            <Upload className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                        <div>
-                            <p className="font-medium">Upload Government ID</p>
-                            <p className="text-xs text-muted-foreground">
-                                Passport, Driver's License, or National ID
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                PNG, JPG, or PDF up to 5MB
-                            </p>
-                        </div>
-                    </label>
-                </div>
-                {/* TODO: Show uploaded file name */}
-                {/* TODO: <FormMessage /> */}
+                <Controller
+                    name="governmentId"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="gap-1">
+                            <FieldLabel htmlFor="governmentId">
+                                Government ID <span className="text-destructive">*</span>
+                            </FieldLabel>
+                            <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                                <Input
+                                    // {...field}
+                                    ref={field.ref}
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0] ?? null;
+                                        field.onChange(file);
+                                    }}
+                                    type="file"
+                                    accept="image/*,.pdf"
+                                    className="hidden"
+                                    id="governmentId"
+                                />
+                                <label
+                                    htmlFor="governmentId"
+                                    className="cursor-pointer flex flex-col items-center gap-2"
+                                >
+                                    <div className="p-3 rounded-full bg-muted">
+                                        <Upload className="h-6 w-6 text-muted-foreground" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium">
+                                            Upload Government ID
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Passport, Driver's License, or National ID
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            PNG, JPG, or PDF up to 5MB
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                            {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                            )}
+                        </Field>
+                    )}
+                />
 
+                {/* // TODO: Show uploaded file name */}
                 <Alert>
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
@@ -171,20 +191,31 @@ export const VerificationStep = () => {
 
             {/* Profile Video */}
             <div className="space-y-2">
-                <Label htmlFor="videoUrl">Profile Video URL</Label>
-                <div className="relative">
-                    <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        id="videoUrl"
-                        placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
-                        className="pl-10"
-                        // TODO: Register with URL validation
-                    />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                    Optional: Add a YouTube, Vimeo, or Loom video introducing yourself
-                </p>
-                {/* TODO: <FormMessage /> */}
+                <Controller
+                    name="videoUrl"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="gap-1">
+                            <FieldLabel htmlFor="videoUrl">Profile Video URL</FieldLabel>
+                            <div className="relative">
+                                <Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    {...field}
+                                    id="videoUrl"
+                                    placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                                    className="pl-10"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Optional: Add a YouTube, Vimeo, or Loom video
+                                    introducing yourself
+                                </p>
+                            </div>
+                            {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                            )}
+                        </Field>
+                    )}
+                />
             </div>
 
             {/* Social Links */}
@@ -199,26 +230,39 @@ export const VerificationStep = () => {
                 <div className="grid gap-3">
                     {socialLinks.map((social) => (
                         <div key={social.key} className="space-y-1">
-                            <Label
-                                htmlFor={social.key}
-                                className="text-sm flex items-center gap-2"
-                            >
-                                <social.icon className="h-4 w-4" />
-                                {social.label}
-                            </Label>
-                            <div className="relative">
-                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    id={social.key}
-                                    placeholder={social.placeholder}
-                                    className="pl-10"
-                                    // TODO: Register with URL validation
-                                />
-                            </div>
+                            <Controller
+                                name={`socialLinks.${social.key}`}
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field
+                                        data-invalid={fieldState.invalid}
+                                        className="gap-1"
+                                    >
+                                        <FieldLabel
+                                            htmlFor={social.key}
+                                            className="text-sm flex items-center gap-2"
+                                        >
+                                            <social.icon className="h-4 w-4" />
+                                            {social.label}
+                                        </FieldLabel>
+                                        <div className="relative">
+                                            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                {...field}
+                                                id={social.key}
+                                                placeholder={social.placeholder}
+                                                className="pl-10"
+                                            />
+                                        </div>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
                         </div>
                     ))}
                 </div>
-                {/* TODO: Show error if no social links provided */}
             </div>
 
             {/* Payment Method */}
@@ -234,35 +278,49 @@ export const VerificationStep = () => {
 
                 <div className="grid gap-3">
                     {paymentMethods.map((method) => (
-                        <label
+                        <Controller
                             key={method.value}
-                            className={cn(
-                                "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all",
-                                "hover:border-primary/50",
-                                paymentMethod === method.value &&
-                                    "border-primary ring-2 ring-primary/20",
+                            name={`payment.method`}
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <Field
+                                    data-invalid={fieldState.invalid}
+                                    className="gap-1"
+                                >
+                                    <FieldLabel
+                                        htmlFor={method.value}
+                                        className={cn(
+                                            "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all",
+                                            "hover:border-primary/50",
+                                            paymentMethod === method.value &&
+                                                "border-primary ring-2 ring-primary/20",
+                                        )}
+                                    >
+                                        <input
+                                            {...field}
+                                            type="radio"
+                                            className="sr-only"
+                                            value={method.value}
+                                        />
+                                        <div className="p-2 rounded-lg bg-muted">
+                                            <CreditCard className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-medium">{method.label}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {method.description}
+                                            </p>
+                                        </div>
+                                        {paymentMethod === method.value && (
+                                            <Check className="h-5 w-5 text-primary" />
+                                        )}{" "}
+                                    </FieldLabel>
+                                    {fieldState.invalid && (
+                                        <FieldError errors={[fieldState.error]} />
+                                    )}
+                                </Field>
                             )}
-                        >
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value={method.value}
-                                className="sr-only"
-                                // TODO: Register
-                            />
-                            <div className="p-2 rounded-lg bg-muted">
-                                <CreditCard className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-medium">{method.label}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {method.description}
-                                </p>
-                            </div>
-                            {paymentMethod === method.value && (
-                                <Check className="h-5 w-5 text-primary" />
-                            )}
-                        </label>
+                        />
                     ))}
                 </div>
 
@@ -271,10 +329,10 @@ export const VerificationStep = () => {
                     <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
                         <Label htmlFor="paypalEmail">PayPal Email</Label>
                         <Input
+                            {...form.register("payment.paypalEmail")}
                             id="paypalEmail"
                             type="email"
                             placeholder="your-paypal@email.com"
-                            // TODO: Register with email validation
                         />
                     </div>
                 )}
@@ -284,18 +342,18 @@ export const VerificationStep = () => {
                         <div className="space-y-2">
                             <Label htmlFor="accountNumber">Account Number</Label>
                             <Input
+                                {...form.register("bank.accountNumber")}
                                 id="accountNumber"
                                 placeholder="••••••••••••"
-                                // TODO: Register with validation
                             />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="routingNumber">Routing Number</Label>
                             <Input
+                                {...form.register("bank.routingNumber")}
                                 id="routingNumber"
                                 placeholder="•••••••••"
                                 maxLength={9}
-                                // TODO: Register with validation (9 digits)
                             />
                         </div>
                     </div>
