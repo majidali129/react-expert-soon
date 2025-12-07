@@ -1,20 +1,18 @@
+import { useSidebar } from "@/state/context/basics/sidebar-context";
+import { useTheme } from "@/state/context/basics/theme-context";
 import { BarChart3, Package, ShoppingCart, Users } from "lucide-react";
 
 export const DemoContent = () => {
-    // TODO: Use context values
-    // const { theme } = useTheme()
-    // const { isOpen } = useSidebar()
-
-    const isOpen = true; // Mock
-    const theme = "dark"; // Mock
+    const { theme } = useTheme();
+    const { isOpen } = useSidebar();
 
     return (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden">
+        <div className="bg-card border border-input rounded-xl overflow-hidden">
             {/* Mini Dashboard Demo */}
             <div className="flex">
                 {/* Sidebar */}
                 <div
-                    className={`border-r border-neutral-800 transition-all duration-300 ${isOpen ? "w-48" : "w-16"}`}
+                    className={`border-r border-input transition-all duration-300 ${isOpen ? "w-42" : "w-16"}`}
                 >
                     <div className="p-4">
                         <div
@@ -38,7 +36,7 @@ export const DemoContent = () => {
                             <button
                                 type="button"
                                 key={item.label}
-                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:bg-neutral-800 transition-colors ${
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:bg-sidebar-accent transition-colors ${
                                     !isOpen && "justify-center"
                                 }`}
                             >
@@ -53,7 +51,7 @@ export const DemoContent = () => {
                 <div className="flex-1 p-4">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-medium">Dashboard</h3>
-                        <span className="text-xs px-2 py-1 rounded bg-neutral-800">
+                        <span className="text-xs px-2 py-1 rounded bg-accent">
                             Theme: {theme}
                         </span>
                     </div>
@@ -66,7 +64,7 @@ export const DemoContent = () => {
                         ].map((stat) => (
                             <div
                                 key={stat.label}
-                                className="bg-neutral-800 rounded-lg p-3"
+                                className="bg-sidebar-accent rounded-lg p-3"
                             >
                                 <p className="text-xs text-neutral-500">{stat.label}</p>
                                 <p className="text-lg font-bold">{stat.value}</p>

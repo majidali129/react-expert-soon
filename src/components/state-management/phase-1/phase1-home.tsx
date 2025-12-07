@@ -52,7 +52,7 @@ const sections = [
 
 export default function Phase1Home() {
     return (
-        <div className="min-h-screen bg-neutral-950 text-neutral-100">
+        <div className="min-h-screen bg-background text-foreground">
             <header className="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-sm sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">

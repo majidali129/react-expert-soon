@@ -40,7 +40,7 @@ const sections = [
 
 export default function Phase2Home() {
     return (
-        <div className="min-h-screen bg-neutral-950 text-neutral-100">
+        <div className="min-h-screen bg-background text-foreground">
             <header className="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-sm sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
@@ -83,7 +83,7 @@ export default function Phase2Home() {
                         <Link
                             key={section.id}
                             to={section.route}
-                            className="group flex items-center gap-6 p-6 bg-neutral-900 border border-neutral-800 rounded-xl hover:border-blue-500/30 transition-all"
+                            className="group flex items-center gap-6 p-6 bg-card border border-neutral-800 rounded-xl hover:border-blue-500/30 transition-all"
                         >
                             <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
                                 <section.icon className="w-6 h-6 text-blue-400" />
