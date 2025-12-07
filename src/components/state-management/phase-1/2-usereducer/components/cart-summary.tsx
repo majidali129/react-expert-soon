@@ -1,11 +1,15 @@
 import { Receipt, CreditCard } from "lucide-react";
+import type { CartShape } from "../usereducer-index";
 
-export const CartSummary = () => {
+type CartSummaryProps = {
+    cartInfo: CartShape;
+};
+export const CartSummary = ({ cartInfo }: CartSummaryProps) => {
     // TODO: Calculate from state
-    const subtotal = 229.97;
-    const tax = 18.4;
-    const total = 248.37;
-    const itemCount = 3;
+    const subtotal = cartInfo.total;
+    const tax = 0;
+    const total = cartInfo.total + tax;
+    const itemCount = cartInfo.itemCount;
 
     return (
         <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">

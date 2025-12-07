@@ -3,11 +3,14 @@ import { ThemeToggle } from "./components/theme-toggle";
 import { SidebarToggle } from "./components/sidebar-toggle";
 import { DemoContent } from "./components/demo-content";
 import { Link } from "react-router";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useSidebar } from "@/state/context/basics/sidebar-context";
 
 export const ContextBasics = () => {
+    const { isOpen } = useSidebar();
     return (
-        <div className="min-h-screen bg-neutral-950 text-neutral-100">
-            <header className="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="min-h-screen">
+            <header className="border-b border-neutral-800 bg-sidebar backdrop-blur-sm sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-6 py-4">
                     <div className="flex items-center gap-4">
                         <Link
@@ -42,7 +45,7 @@ export const ContextBasics = () => {
                 </div>
 
                 {/* Context Template */}
-                <div className="mb-6 p-4 bg-neutral-900 border border-neutral-800 rounded-xl">
+                <Card className="mb-6 p-4 border border-input ">
                     <h4 className="text-sm font-medium mb-3 text-amber-400">
                         Context Template
                     </h4>
@@ -71,7 +74,7 @@ export function useTheme() {
   return context
 }`}
                     </pre>
-                </div>
+                </Card>
 
                 {/* Demo Area */}
                 <div className="grid lg:grid-cols-3 gap-6">
@@ -83,19 +86,29 @@ export function useTheme() {
                         <SidebarToggle />
 
                         {/* Debug */}
-                        <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
-                            <h4 className="text-sm font-medium mb-3">Context Values</h4>
-                            <div className="space-y-2 text-xs font-mono">
-                                <div className="p-2 bg-neutral-800 rounded">
-                                    <span className="text-neutral-500">theme:</span>
-                                    <span className="text-blue-400 ml-2">"dark"</span>
+                        <Card className="">
+                            <CardHeader>
+                                <h4 className="text-sm font-medium mb-3">
+                                    Context Values
+                                </h4>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2 text-xs font-mono">
+                                    <div className="p-2 bg-sidebar-accent rounded">
+                                        <span className="text-neutral-500">theme:</span>
+                                        <span className="text-blue-400 ml-2">"dark"</span>
+                                    </div>
+                                    <div className="p-2 bg-sidebar-accent rounded">
+                                        <span className="text-neutral-500">
+                                            sidebarOpen:
+                                        </span>
+                                        <span className="text-emerald-400 ml-2">
+                                            {String(isOpen)}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="p-2 bg-neutral-800 rounded">
-                                    <span className="text-neutral-500">sidebarOpen:</span>
-                                    <span className="text-emerald-400 ml-2">true</span>
-                                </div>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </main>

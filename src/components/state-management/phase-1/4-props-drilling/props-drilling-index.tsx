@@ -2,7 +2,7 @@ import { ArrowLeft, Activity } from "lucide-react";
 import { Link } from "react-router";
 import { DashboardLayout } from "./components/dashboard-layout";
 
-export const PropDrilling = () => {
+export const PropsDrilling = () => {
     return (
         <div className="min-h-screen bg-neutral-950 text-neutral-100">
             <header className="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-sm sticky top-0 z-10">

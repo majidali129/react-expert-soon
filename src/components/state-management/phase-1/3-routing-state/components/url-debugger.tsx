@@ -1,9 +1,10 @@
 import { Link2, Copy } from "lucide-react";
+import { useLocation, useSearchParams } from "react-router";
 
 export const UrlDebugger = () => {
     // TODO: Show actual URL params
-    // const searchParams = useSearchParams()
-    // const pathname = usePathname()
+    const [searchParams] = useSearchParams();
+    const { pathname } = useLocation();
 
     return (
         <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 sticky top-24">
@@ -31,10 +32,10 @@ export const UrlDebugger = () => {
                 <div className="p-3 bg-neutral-800 rounded-lg font-mono text-xs">
                     <pre className="text-neutral-300">
                         {`{
-  "status": "all",
-  "dateRange": "all",
-  "sort": "newest",
-  "page": 1
+  "status": ${searchParams.get("status") || "all"},
+  "dateRange": ${searchParams.get("dateRange") || "all"} ,
+  "sort": ${searchParams.get("sort") || "newest"},
+  "page": ${searchParams.get("page") || 1}
 }`}
                     </pre>
                 </div>
