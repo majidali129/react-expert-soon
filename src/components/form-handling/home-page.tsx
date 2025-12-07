@@ -67,10 +67,10 @@ const phases = [
 export const FormHandlingHomePage = () => {
     return (
         <div className="min-h-screen bg-linear-to-b from-background to-muted/30">
-            <div className="container mx-auto px-4 py-16">
+            <div className="container mx-auto px-4 py-14">
                 {/* Header */}
-                <div className="text-center mb-16">
-                    <Badge variant="outline" className="mb-4">
+                <div className="text-center">
+                    <Badge variant="outline" className="mb-2">
                         Form Mastery Practice
                     </Badge>
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
@@ -81,6 +81,17 @@ export const FormHandlingHomePage = () => {
                         to production-ready Zod + React Hook Form integration. UI is ready
                         — you add the logic.
                     </p>
+                </div>
+                {/* 
+                // ! Quick actions for state-management & data-fetchng phases
+                */}
+                <div className="flex items-center justify-center py-3.5 gap-5">
+                    <Button asChild>
+                        <Link to="/state-management">State Management</Link>
+                    </Button>
+                    <Button asChild>
+                        <Link to="/data-fetching">Data-fetching</Link>
+                    </Button>
                 </div>
 
                 {/* Phase Cards */}
@@ -123,15 +134,6 @@ export const FormHandlingHomePage = () => {
                             </CardContent>
                         </Card>
                     ))}
-                </div>
-
-                {/* Quick Info */}
-                <div className="mt-16 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        📖 Check{" "}
-                        <code className="bg-muted px-2 py-1 rounded">README.md</code> for
-                        detailed instructions and success criteria
-                    </p>
                 </div>
             </div>
         </div>

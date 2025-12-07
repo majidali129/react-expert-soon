@@ -1,4 +1,5 @@
-import { Package, MoreVertical } from "lucide-react";
+import { Package, MoreVertical, Check } from "lucide-react";
+import { useState } from "react";
 
 const mockProducts = [
     {
@@ -58,22 +59,19 @@ const mockProducts = [
 ];
 
 export const ProductTable = () => {
-    // TODO: Add array state for selected products
-    // const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+    const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
-    // TODO: Toggle single product selection
-    // const toggleProduct = (id: string) => {
-    //   setSelectedProducts(prev =>
-    //     prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    //   )
-    // }
+    const toggleProduct = (id: string) => {
+        setSelectedProducts((prev) =>
+            prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
+        );
+    };
 
-    // TODO: Select all / Deselect all
-    // const toggleAll = () => {
-    //   setSelectedProducts(prev =>
-    //     prev.length === mockProducts.length ? [] : mockProducts.map(p => p.id)
-    //   )
-    // }
+    const toggleAll = () => {
+        setSelectedProducts((prev) =>
+            prev.length === mockProducts.length ? [] : mockProducts.map((p) => p.id),
+        );
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -98,10 +96,11 @@ export const ProductTable = () => {
                         ({mockProducts.length} items)
                     </span>
                 </div>
-                {/* TODO: Show selected count when items selected */}
-                {/* {selectedProducts.length > 0 && (
-          <span className="text-sm text-emerald-400">{selectedProducts.length} selected</span>
-        )} */}
+                {selectedProducts.length > 0 && (
+                    <span className="text-sm text-emerald-400">
+                        {selectedProducts.length} selected
+                    </span>
+                )}
             </div>
 
             <div className="overflow-x-auto">
@@ -109,13 +108,14 @@ export const ProductTable = () => {
                     <thead>
                         <tr className="bg-neutral-800/50">
                             <th className="p-4 text-left w-12">
-                                {/* TODO: Select all checkbox */}
                                 <button
                                     type="button"
                                     className="w-5 h-5 rounded border border-neutral-600 flex items-center justify-center hover:border-emerald-500/50 transition-colors"
-                                    // TODO: onClick={toggleAll}
+                                    onClick={toggleAll}
                                 >
-                                    {/* TODO: Show check when all selected */}
+                                    {selectedProducts.length === mockProducts.length && (
+                                        <Check className="w-3 h-3 text-emerald-400" />
+                                    )}
                                 </button>
                             </th>
                             <th className="p-4 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">
@@ -143,14 +143,14 @@ export const ProductTable = () => {
                                 className="border-t border-neutral-800 hover:bg-neutral-800/30 transition-colors"
                             >
                                 <td className="p-4">
-                                    {/* TODO: Individual checkbox */}
                                     <button
                                         type="button"
                                         className="w-5 h-5 rounded border border-neutral-600 flex items-center justify-center hover:border-emerald-500/50 transition-colors"
-                                        // TODO: onClick={() => toggleProduct(product.id)}
+                                        onClick={() => toggleProduct(product.id)}
                                     >
-                                        {/* TODO: Show check when selected */}
-                                        {/* {selectedProducts.includes(product.id) && <Check className="w-3 h-3 text-emerald-400" />} */}
+                                        {selectedProducts.includes(product.id) && (
+                                            <Check className="w-3 h-3 text-emerald-400" />
+                                        )}
                                     </button>
                                 </td>
                                 <td className="p-4">

@@ -4,7 +4,7 @@ export const ActionHistory = () => {
     // TODO: Track dispatched actions for undo/redo
     const mockHistory = [
         { type: "ADD_ITEM", payload: "Wireless Mouse", timestamp: "10:23:45" },
-        { type: "ADD_ITEM", payload: "Mechanical Keyboard", timestamp: "10:23:48" },
+        { type: "ADD_ITEM2", payload: "Mechanical Keyboard", timestamp: "10:23:48" },
         { type: "UPDATE_QUANTITY", payload: "Wireless Mouse: 2", timestamp: "10:23:52" },
     ];
 

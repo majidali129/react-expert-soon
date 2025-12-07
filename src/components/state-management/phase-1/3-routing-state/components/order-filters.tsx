@@ -1,26 +1,26 @@
 import { Filter, Calendar, SortAsc } from "lucide-react";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 export const OrderFilters = () => {
-    // TODO: Use useSearchParams to manage URL state
-    // const searchParams = useSearchParams()
-    // const router = useRouter()
-    // const pathname = usePathname()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
 
-    // TODO: Read from URL
-    // const status = searchParams.get('status') || 'all'
-    // const dateRange = searchParams.get('dateRange') || 'all'
-    // const sort = searchParams.get('sort') || 'newest'
+    const status = searchParams.get("status") || "all";
+    const dateRange = searchParams.get("dateRange") || "all";
+    const sort = searchParams.get("sort") || "newest";
 
-    // TODO: Update URL params
-    // const updateParams = (key: string, value: string) => {
-    //   const params = new URLSearchParams(searchParams)
-    //   if (value === 'all') {
-    //     params.delete(key)
-    //   } else {
-    //     params.set(key, value)
-    //   }
-    //   router.push(`${pathname}?${params.toString()}`)
-    // }
+    const updateParams = (key: string, value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value === "all") {
+            params.delete(key);
+        } else {
+            params.set(key, value);
+        }
+
+        // setSearchParams(params);
+        navigate(`${pathname}?${params.toString()}`);
+    };
 
     const statuses = [
         { value: "all", label: "All Orders" },
@@ -67,7 +67,8 @@ export const OrderFilters = () => {
                     </label>
                     <select
                         className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm focus:outline-none focus:border-emerald-500/50"
-                        // TODO: value={status} onChange={(e) => updateParams('status', e.target.value)}
+                        value={status}
+                        onChange={(e) => updateParams("status", e.target.value)}
                     >
                         {statuses.map((s) => (
                             <option key={s.value} value={s.value}>
@@ -88,7 +89,8 @@ export const OrderFilters = () => {
                     </label>
                     <select
                         className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm focus:outline-none focus:border-emerald-500/50"
-                        // TODO: value={dateRange} onChange={(e) => updateParams('dateRange', e.target.value)}
+                        value={dateRange}
+                        onChange={(e) => updateParams("dateRange", e.target.value)}
                     >
                         {dateRanges.map((d) => (
                             <option key={d.value} value={d.value}>
@@ -109,7 +111,8 @@ export const OrderFilters = () => {
                     </label>
                     <select
                         className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-sm focus:outline-none focus:border-emerald-500/50"
-                        // TODO: value={sort} onChange={(e) => updateParams('sort', e.target.value)}
+                        value={sort}
+                        onChange={(e) => updateParams("sort", e.target.value)}
                     >
                         {sortOptions.map((s) => (
                             <option key={s.value} value={s.value}>

@@ -4,7 +4,12 @@ import { ProductFilters } from "./components/product-filters";
 import { ProductTable } from "./components/product-table";
 import { QuickActions } from "./components/quick-actions";
 import { DebugPanel } from "./components/debug-panel";
+import { useState } from "react";
+
 export const UseState = () => {
+    const [counter, setCounter] = useState(0);
+    const [batchedCounter, setBatchedCounter] = useState(0);
+
     return (
         <div className="min-h-screen bg-neutral-950 text-neutral-100">
             <header className="border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-sm sticky top-0 z-10">
@@ -52,19 +57,19 @@ export const UseState = () => {
 
                 <div className="grid lg:grid-cols-4 gap-6">
                     <div className="lg:col-span-3 space-y-6">
-                        {/* Filters - TODO: Add individual state for each filter */}
                         <ProductFilters />
-
-                        {/* Products Table - TODO: Add array state for selection */}
                         <ProductTable />
                     </div>
 
                     <div className="space-y-6">
-                        {/* Quick Actions - TODO: Demonstrate batching */}
-                        <QuickActions />
+                        <QuickActions
+                            counter={counter}
+                            batchedCounter={batchedCounter}
+                            setCounter={setCounter}
+                            setBatchedCounter={setBatchedCounter}
+                        />
 
-                        {/* Debug Panel - Shows current state */}
-                        <DebugPanel />
+                        <DebugPanel counter={counter} batchedCounter={batchedCounter} />
                     </div>
                 </div>
             </main>

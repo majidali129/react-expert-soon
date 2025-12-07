@@ -1,8 +1,10 @@
 import { Bug } from "lucide-react";
+type DebugPanelProps = {
+    counter: number;
+    batchedCounter: number;
+};
 
-export const DebugPanel = () => {
-    // TODO: Receive state from parent or context to display here
-
+export const DebugPanel = ({ counter, batchedCounter }: DebugPanelProps) => {
     return (
         <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
@@ -30,16 +32,17 @@ export const DebugPanel = () => {
                 <div className="p-2 bg-neutral-800 rounded">
                     <p className="text-neutral-500 mb-1">Counters</p>
                     <pre className="text-purple-400">
-                        {`{
-  nonBatched: 0,
-  batched: 0
-}`}
+                        Counter: {counter} <br />
+                        Batched-counter: {batchedCounter}
                     </pre>
                 </div>
 
                 <div className="p-2 bg-neutral-800 rounded">
                     <p className="text-neutral-500 mb-1"> Render Count</p>
-                    <pre className="text-amber-400">0</pre>
+                    <pre className="text-amber-400">
+                        Personal: {0} <br />
+                        From-parent: {0}
+                    </pre>
                 </div>
             </div>
 

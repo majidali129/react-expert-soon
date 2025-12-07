@@ -1,52 +1,12 @@
-"use client";
-
 import { Plus, Package } from "lucide-react";
+import { addItem, type CartAction, type Product } from "../usereducer-index";
+import type { ActionDispatch } from "react";
 
-const products = [
-    {
-        id: "p1",
-        name: "Wireless Mouse",
-        price: 49.99,
-        image: "/placeholder.svg?height=80&width=80",
-    },
-    {
-        id: "p2",
-        name: "Mechanical Keyboard",
-        price: 129.99,
-        image: "/placeholder.svg?height=80&width=80",
-    },
-    {
-        id: "p3",
-        name: "USB-C Hub",
-        price: 79.99,
-        image: "/placeholder.svg?height=80&width=80",
-    },
-    {
-        id: "p4",
-        name: "Monitor Stand",
-        price: 89.99,
-        image: "/placeholder.svg?height=80&width=80",
-    },
-    {
-        id: "p5",
-        name: "Webcam HD",
-        price: 69.99,
-        image: "/placeholder.svg?height=80&width=80",
-    },
-    {
-        id: "p6",
-        name: "Desk Lamp",
-        price: 39.99,
-        image: "/placeholder.svg?height=80&width=80",
-    },
-];
-
-export const ProductCatalog = () => {
-    // TODO: dispatch ADD_ITEM action
-    // const handleAddToCart = (product) => {
-    //   dispatch({ type: 'ADD_ITEM', payload: product })
-    // }
-
+type ProductCatalogProps = {
+    products: Product[];
+    dispatch: ActionDispatch<[action: CartAction]>;
+};
+export const ProductCatalog = ({ products, dispatch }: ProductCatalogProps) => {
     return (
         <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
@@ -70,7 +30,7 @@ export const ProductCatalog = () => {
                         <button
                             type="button"
                             className="mt-auto flex items-center justify-center gap-2 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors text-sm"
-                            // TODO: onClick={() => handleAddToCart(product)}
+                            onClick={() => dispatch(addItem(product))}
                         >
                             <Plus className="w-4 h-4" />
                             Add to Cart
