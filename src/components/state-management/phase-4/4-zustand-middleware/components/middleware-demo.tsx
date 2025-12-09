@@ -1,11 +1,39 @@
-import { Save, Bug, Layers, RefreshCw, HardDrive, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    getIsSidebarOpen,
+    getTheme,
+    getTodos,
+    useSidebarThemeStore,
+} from "@/state/zustand/middleware/theme-sidebar-store";
+import {
+    Save,
+    Bug,
+    Layers,
+    RefreshCw,
+    HardDrive,
+    Trash2,
+    CheckCircle,
+} from "lucide-react";
+import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 export const MiddlewareDemo = () => {
-    // TODO: Setup persist middleware with localStorage
-    // TODO: Add devtools middleware for debugging
-    // TODO: Create custom logger middleware
-    // TODO: Handle hydration with onRehydrateStorage
-    // TODO: Use partialize to persist only specific state
+    const [title, setTitle] = useState("");
+    const theme = useSidebarThemeStore(getTheme);
+    const todos = useSidebarThemeStore(getTodos);
+    const isSidebarOpen = useSidebarThemeStore(getIsSidebarOpen);
+    const [setTheme, toggleSidebar, addTodo, removeTodo, toggleTodo] =
+        useSidebarThemeStore(
+            useShallow((state) => [
+                state.setTheme,
+                state.toggleSidebar,
+                state.addTodo,
+                state.removeTodo,
+                state.toggleTodo,
+            ]),
+        );
 
     return (
         <div className="space-y-6">
@@ -47,7 +75,7 @@ export const MiddlewareDemo = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-6 ">
                 {/* Persist Demo */}
                 <div className="bg-neutral-900 border border-neutral-800 rounded-xl">
                     <div className="p-4 border-b border-neutral-800">
@@ -60,18 +88,21 @@ export const MiddlewareDemo = () => {
                         <div className="p-4 bg-neutral-800 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm">Theme Preference</span>
+                                <Badge> {theme}</Badge>
                                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">
                                     persisted
                                 </span>
                             </div>
                             <div className="flex gap-2">
                                 <button
+                                    onClick={() => setTheme("light")}
                                     type="button"
                                     className="flex-1 py-2 bg-neutral-700 rounded-lg text-sm"
                                 >
                                     Light
                                 </button>
                                 <button
+                                    onClick={() => setTheme("dark")}
                                     type="button"
                                     className="flex-1 py-2 bg-amber-500/20 border border-amber-500/30 rounded-lg text-sm"
                                 >
@@ -82,6 +113,7 @@ export const MiddlewareDemo = () => {
                         <div className="p-4 bg-neutral-800 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm">Sidebar State</span>
+                                <Badge> {isSidebarOpen ? "OPEN" : "CLOSE"}</Badge>
                                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">
                                     persisted
                                 </span>
@@ -90,7 +122,8 @@ export const MiddlewareDemo = () => {
                                 <input
                                     type="checkbox"
                                     className="w-4 h-4"
-                                    defaultChecked
+                                    checked={isSidebarOpen}
+                                    onChange={toggleSidebar}
                                 />
                                 <span className="text-sm text-neutral-400">Expanded</span>
                             </div>
@@ -116,35 +149,108 @@ export const MiddlewareDemo = () => {
 
                 {/* DevTools Demo */}
                 <div className="bg-neutral-900 border border-neutral-800 rounded-xl">
-                    <div className="p-4 border-b border-neutral-800">
-                        <h3 className="font-semibold flex items-center gap-2">
-                            <Bug className="w-4 h-4 text-purple-400" />
-                            DevTools Middleware
-                        </h3>
-                    </div>
-                    <div className="p-4 space-y-3">
-                        <div className="p-3 bg-neutral-800 rounded-lg">
-                            <p className="text-xs text-neutral-500 mb-1">Action</p>
-                            <p className="text-sm font-mono text-purple-400">setTheme</p>
+                    <div className="grid grid-cols-2">
+                        <div>
+                            <div className="p-4 border-b border-neutral-800">
+                                <h3 className="font-semibold flex items-center gap-2">
+                                    <Bug className="w-4 h-4 text-purple-400" />
+                                    DevTools Middleware
+                                </h3>
+                            </div>
+                            <div className="p-4 space-y-3">
+                                <div className="p-3 bg-neutral-800 rounded-lg">
+                                    <p className="text-xs text-neutral-500 mb-1">
+                                        Action
+                                    </p>
+                                    <p className="text-sm font-mono text-purple-400">
+                                        setTheme
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-neutral-800 rounded-lg">
+                                    <p className="text-xs text-neutral-500 mb-1">
+                                        Payload
+                                    </p>
+                                    <pre className="text-xs text-neutral-400">
+                                        {"{ theme: 'dark' }"}
+                                    </pre>
+                                </div>
+                                <div className="p-3 bg-neutral-800 rounded-lg">
+                                    <p className="text-xs text-neutral-500 mb-1">
+                                        State After
+                                    </p>
+                                    <pre className="text-xs text-neutral-400">
+                                        {`{
+                          theme: "dark",
+                          sidebarOpen: true
+                        }`}
+                                    </pre>
+                                </div>
+                                <p className="text-xs text-neutral-500 text-center">
+                                    Open Redux DevTools extension to see actions
+                                </p>
+                            </div>
                         </div>
-                        <div className="p-3 bg-neutral-800 rounded-lg">
-                            <p className="text-xs text-neutral-500 mb-1">Payload</p>
-                            <pre className="text-xs text-neutral-400">
-                                {"{ theme: 'dark' }"}
-                            </pre>
+                        <div>
+                            <div className="p-4 border-b border-neutral-800">
+                                <h3 className="font-semibold flex items-center gap-2">
+                                    <CheckCircle className="w-4 h-4 text-purple-400" />
+                                    Todos List
+                                </h3>
+                            </div>
+                            <div className="p-4 space-y-3 max-h-64 overflow-y-auto">
+                                {/* Here we'll create a simple input to set title for new todo */}
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        addTodo(title);
+                                        setTimeout(() => setTitle(""), 100);
+                                    }}
+                                >
+                                    <Input
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="h-auto py-1"
+                                        placeholder="add new todo..."
+                                    />
+                                </form>
+                                {/* We'll render list of todos, with styled toto-item card having title, status, actions for toggle status, delete */}
+
+                                <div>
+                                    {todos.map((todo) => (
+                                        <div
+                                            key={todo.id}
+                                            className="py-2 px-2.5 bg-neutral-800 rounded-lg mb-2 flex items-center justify-between"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4"
+                                                    checked={todo.completed}
+                                                    onChange={() => toggleTodo(todo.id)}
+                                                />
+                                                <span
+                                                    className={`text-sm ${
+                                                        todo.completed
+                                                            ? "line-through text-neutral-500"
+                                                            : "text-neutral-300"
+                                                    }`}
+                                                >
+                                                    {todo.title}
+                                                </span>
+                                            </div>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                className="size-7"
+                                                onClick={() => removeTodo(todo.id)}
+                                            >
+                                                <Trash2 className="w-2 h-2" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-3 bg-neutral-800 rounded-lg">
-                            <p className="text-xs text-neutral-500 mb-1">State After</p>
-                            <pre className="text-xs text-neutral-400">
-                                {`{
-  theme: "dark",
-  sidebarOpen: true
-}`}
-                            </pre>
-                        </div>
-                        <p className="text-xs text-neutral-500 text-center">
-                            Open Redux DevTools extension to see actions
-                        </p>
                     </div>
                 </div>
             </div>

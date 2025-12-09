@@ -1,109 +1,17 @@
-import { Plus, GripVertical, Trash2, MoreHorizontal } from "lucide-react";
-
-const columns = [
-    { id: "todo", title: "To Do", color: "neutral" },
-    { id: "in-progress", title: "In Progress", color: "amber" },
-    { id: "done", title: "Done", color: "green" },
-];
-
-const mockTasks = [
-    { id: "t1", title: "Setup Zustand store", status: "done" },
-    { id: "t2", title: "Create task actions", status: "in-progress" },
-    { id: "t3", title: "Add drag and drop", status: "todo" },
-    { id: "t4", title: "Implement selectors", status: "todo" },
-    { id: "t5", title: "Test re-render optimization", status: "in-progress" },
-];
+import { CreateTaskForm } from "./create-task-form";
+import { TaskCount } from "./task-count";
+import { TaskList } from "./task-list";
 
 export const TaskBoard = () => {
-    // TODO: Create useTaskStore with create()
-    // TODO: Define tasks state array
-    // TODO: Add actions: addTask, updateStatus, deleteTask, moveTask
-    // TODO: Use selectors to prevent re-renders
-    // TODO: Access state with getState() outside React
-
+    console.log("Board renders");
     return (
         <div className="space-y-6">
             {/* Add Task Form */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
-                <div className="flex gap-3">
-                    <input
-                        type="text"
-                        placeholder="Add a new task..."
-                        className="flex-1 px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg focus:outline-none focus:border-amber-500"
-                    />
-                    <button
-                        type="button"
-                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 rounded-lg flex items-center gap-2 transition-colors"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Task
-                    </button>
-                </div>
-            </div>
-
+            <CreateTaskForm />
             {/* Kanban Board */}
-            <div className="grid grid-cols-3 gap-4">
-                {columns.map((column) => {
-                    const columnTasks = mockTasks.filter((t) => t.status === column.id);
-                    const colorClasses = {
-                        neutral: "border-neutral-700 bg-neutral-800/50",
-                        amber: "border-amber-500/30 bg-amber-500/5",
-                        green: "border-green-500/30 bg-green-500/5",
-                    };
-
-                    return (
-                        <div
-                            key={column.id}
-                            className="bg-neutral-900 border border-neutral-800 rounded-xl"
-                        >
-                            <div
-                                className={`p-4 border-b ${colorClasses[column.color as keyof typeof colorClasses]}`}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold">{column.title}</h3>
-                                    <span className="text-xs text-neutral-500 bg-neutral-800 px-2 py-0.5 rounded">
-                                        {columnTasks.length}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="p-3 space-y-2 min-h-64">
-                                {columnTasks.map((task) => (
-                                    <div
-                                        key={task.id}
-                                        className="p-3 bg-neutral-800 border border-neutral-700 rounded-lg hover:border-amber-500/30 transition-colors group cursor-grab"
-                                    >
-                                        <div className="flex items-start gap-2">
-                                            <GripVertical className="w-4 h-4 text-neutral-600 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <p className="flex-1 text-sm">{task.title}</p>
-                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    type="button"
-                                                    className="p-1 hover:bg-neutral-700 rounded"
-                                                >
-                                                    <MoreHorizontal className="w-3 h-3 text-neutral-500" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="p-1 hover:bg-red-500/20 hover:text-red-400 rounded"
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                                {columnTasks.length === 0 && (
-                                    <div className="h-32 flex items-center justify-center border-2 border-dashed border-neutral-800 rounded-lg">
-                                        <p className="text-xs text-neutral-600">
-                                            Drop tasks here
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+            <TaskList>
+                <TaskCount />
+            </TaskList>
 
             {/* Render Counter Demo */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
