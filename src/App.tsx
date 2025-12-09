@@ -18,6 +18,18 @@ import { ZustandBasicsPage } from "./pages/state-management/phase-4/zustand-basi
 import { ZustandPatternsPage } from "./pages/state-management/phase-4/zustand-patterns";
 import { ZustandContextPage } from "./pages/state-management/phase-4/zustand-context";
 import { ZustandMiddlewarePage } from "./pages/state-management/phase-4/zustand-middleware";
+import { DataFetchingDashboard } from "./pages/data-fetching";
+import { DataFetchingPhase1Page } from "./pages/data-fetching/phase-1";
+import { QueryBasicsPage } from "./pages/data-fetching/phase-3/query-basics";
+import { BasicFetchPage } from "./pages/data-fetching/phase-1/basic-fetch";
+import { CustomHooksPage } from "./pages/data-fetching/phase-1/custom-hooks";
+import { WaterfallPage } from "./pages/data-fetching/phase-1/waterfall";
+import { CancellationPage } from "./pages/data-fetching/phase-1/cancellation";
+import { DataFetchingPhase2Page } from "./pages/data-fetching/phase-2";
+import { ReduxThunkPage } from "./pages/data-fetching/phase-2/redux-thunk";
+import { ReduxToolkitAsyncPage } from "./pages/data-fetching/phase-2/rtk-async";
+import { DataFetchingPhase3Page } from "./pages/data-fetching/phase-3";
+import { MutationsPage } from "./pages/data-fetching/phase-3/mutations";
 
 export const App = () => {
     return (
@@ -57,6 +69,28 @@ export const App = () => {
                         path="4-zustand-middleware"
                         element={<ZustandMiddlewarePage />}
                     />
+                </Route>
+            </Route>
+            <Route path="data-fetching">
+                <Route index element={<DataFetchingDashboard />} />
+                <Route path="phase-1">
+                    <Route index element={<DataFetchingPhase1Page />} />
+                    <Route path="1-basic-fetch" element={<BasicFetchPage />} />
+                    <Route path="2-custom-hooks" element={<CustomHooksPage />} />
+                    <Route path="3-waterfall" element={<WaterfallPage />} />
+                    <Route path="4-cancellation" element={<CancellationPage />} />
+                </Route>
+                <Route path="phase-2">
+                    <Route index element={<DataFetchingPhase2Page />} />
+                    <Route path="2-redux-thunk" element={<ReduxThunkPage />} />
+                    <Route path="1-context-di" element={<ContextDiPage />} />
+                    <Route path="3-redux-toolkit" element={<ReduxToolkitAsyncPage />} />
+                </Route>
+                <Route path="phase-3">
+                    <Route index element={<DataFetchingPhase3Page />} />
+                    <Route path="1-query-basics" element={<QueryBasicsPage />} />
+                    <Route path="2-context-patterns" element={<ContextPatternsPage />} />
+                    <Route path="3-mtations" element={<MutationsPage />} />
                 </Route>
             </Route>
         </Routes>
