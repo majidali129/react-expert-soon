@@ -13,6 +13,11 @@ import { StateManagementPhase2Page } from "./pages/state-management/phase-2";
 import { ContextBasicsPage } from "./pages/state-management/phase-2/context-basics";
 import { ContextPatternsPage } from "./pages/state-management/phase-2/context-patterns";
 import { ContextDiPage } from "./pages/state-management/phase-2/context-di";
+import { StateManagementPhase4Page } from "./pages/state-management/phase-4";
+import { ZustandBasicsPage } from "./pages/state-management/phase-4/zustand-basics";
+import { ZustandPatternsPage } from "./pages/state-management/phase-4/zustand-patterns";
+import { ZustandContextPage } from "./pages/state-management/phase-4/zustand-context";
+import { ZustandMiddlewarePage } from "./pages/state-management/phase-4/zustand-middleware";
 
 export const App = () => {
     return (
@@ -42,6 +47,16 @@ export const App = () => {
                     <Route path="1-context-basics" element={<ContextBasicsPage />} />
                     <Route path="2-context-patterns" element={<ContextPatternsPage />} />
                     <Route path="3-context-di" element={<ContextDiPage />} />
+                </Route>
+                <Route path="phase-4">
+                    <Route index element={<StateManagementPhase4Page />} />
+                    <Route path="1-zustand-basics" element={<ZustandBasicsPage />} />
+                    <Route path="2-zustand-patterns" element={<ZustandPatternsPage />} />
+                    <Route path="3-zustand-context" element={<ZustandContextPage />} />
+                    <Route
+                        path="4-zustand-middleware"
+                        element={<ZustandMiddlewarePage />}
+                    />
                 </Route>
             </Route>
         </Routes>
