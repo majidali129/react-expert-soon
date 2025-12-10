@@ -1,0 +1,65 @@
+{
+    "jobs": [
+        {
+            "id": 1,
+            "title": "Senior Frontend Developer",
+            "company": { "id": 1, "name": "TechCorp", "logo": "/placeholder.svg" },
+            "location": "San Francisco, CA",
+            "type": "full-time",
+            "salary": { "min": 150000, "max": 200000, "currency": "USD" },
+            "description": "Build beautiful user interfaces with React and TypeScript.",
+            "requirements": ["5+ years React", "TypeScript", "Testing"],
+            "postedAt": "2024-01-15",
+            "isSaved": false
+        },
+        {
+            "id": 2,
+            "title": "React Engineer",
+            "company": { "id": 2, "name": "StartupXYZ", "logo": "/placeholder.svg" },
+            "location": "Remote",
+            "type": "contract",
+            "salary": { "min": 120000, "max": 160000, "currency": "USD" },
+            "description": "Work on greenfield React projects.",
+            "requirements": ["3+ years React", "hooks", "CI/CD"],
+            "postedAt": "2024-01-14",
+            "isSaved": true
+        },
+        {
+            "id": 3,
+            "title": "Full Stack Developer",
+            "company": { "id": 3, "name": "Enterprise Inc", "logo": "/placeholder.svg" },
+            "location": "New York, NY",
+            "type": "full-time",
+            "salary": { "min": 130000, "max": 180000, "currency": "USD" },
+            "description": "Work across frontend and backend services.",
+            "requirements": ["Node.js", "React", "SQL"],
+            "postedAt": "2024-01-13",
+            "isSaved": false
+        }
+    ],
+    "applications": [
+        {
+            "id": 1,
+            "jobId": 1,
+            "userId": 1,
+            "status": "pending",
+            "createdAt": "2024-01-20"
+        }
+    ],
+    "companies": [
+        { "id": 1, "name": "TechCorp", "logo": "/placeholder.svg", "industry": "SaaS" },
+        {
+            "id": 2,
+            "name": "StartupXYZ",
+            "logo": "/placeholder.svg",
+            "industry": "Fintech"
+        },
+        {
+            "id": 3,
+            "name": "Enterprise Inc",
+            "logo": "/placeholder.svg",
+            "industry": "Retail"
+        }
+    ],
+    "users": [{ "id": 1, "name": "Alice", "email": "alice@example.com" }]
+}

@@ -1,45 +1,113 @@
+import { getJobs, type Job } from "@/lib/api";
 import { Search, MapPin, Building2, X, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent, type RefObject } from "react";
+import { set } from "zod";
 
 // TODO: Implement AbortController
 // TODO: Add debounce for search input
 // TODO: Cancel previous request on new search
 // TODO: Handle AbortError gracefully
 
+let cancelledCount = 0;
+const time = 200;
 export const JobSearch = () => {
     // TODO: Add state
-    // const [query, setQuery] = useState('')
-    // const [results, setResults] = useState<Job[]>([])
-    // const [loading, setLoading] = useState(false)
+    const [query, setQuery] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [results, setResults] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(false);
+    const controllerRef = useRef<AbortController | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [jobs, setJobs] = useState<Job[]>([]);
 
-    const query = "";
-    const loading = false;
-    const results = [
-        {
-            id: "1",
-            title: "Senior Frontend Developer",
-            company: "TechCorp",
-            location: "San Francisco, CA",
-            match: 95,
-        },
-        {
-            id: "2",
-            title: "Frontend Engineer",
-            company: "StartupXYZ",
-            location: "Remote",
-            match: 88,
-        },
-        {
-            id: "3",
-            title: "React Developer",
-            company: "Enterprise Inc",
-            location: "New York, NY",
-            match: 82,
-        },
-    ];
+    console.log(results);
 
     // Track cancelled requests for debug
-    const cancelledCount = 0;
     const activeRequest = false;
+
+    const handleSearch = async (e: ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setQuery(value);
+
+        // Abort previous request
+        if (controllerRef.current) {
+            controllerRef.current.abort();
+        }
+        // cancel previous debounce
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+            cancelledCount += 1;
+        }
+
+        debounceRef.current = setTimeout(async () => {
+            if (!value.trim()) {
+                setResults([]);
+                setLoading(false);
+                return;
+            }
+
+            controllerRef.current = new AbortController();
+
+            try {
+                // const result = await getJobs({ q: value });
+                const response = await fetch(`http://localhost:4000/jobs?q=${value}`, {
+                    signal: controllerRef.current.signal,
+                });
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                const result: Job[] = await response.json();
+                setResults(result);
+                setLoading(false);
+            } catch (error) {
+                if (error instanceof Error && error.name === "AbortError") {
+                    setError(error.message);
+                }
+
+                console.log("ERROR: ", error);
+            } finally {
+                setLoading(false);
+            }
+        }, 700);
+    };
+
+    // Time based cancellation Pattern;
+    useEffect(() => {
+        const jobsController = new AbortController();
+
+        const timeoutId = setTimeout(() => {
+            jobsController.abort();
+        }, time);
+
+        const fetchJobs = async () => {
+            setLoading(true);
+            try {
+                const jobs = await await fetch(`http://localhost:4000/jobs`, {
+                    signal: jobsController.signal,
+                });
+                clearTimeout(timeoutId);
+                const data: Job[] = await jobs.json();
+                setJobs(data);
+                setLoading(false);
+            } catch (error) {
+                console.log("Error in jobs fetch", error);
+                if (error instanceof Error && error.name === "AbortError") {
+                    console.log("Jobs fetch aborted", error.message);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchJobs();
+        return () => {
+            jobsController.abort();
+            clearTimeout(timeoutId);
+        };
+    }, []);
+
+    console.log(cancelledCount);
+    console.log(jobs);
 
     return (
         <div>
@@ -47,6 +115,8 @@ export const JobSearch = () => {
             <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
                 <input
+                    value={query}
+                    onChange={handleSearch}
                     type="text"
                     placeholder="Search jobs by title, company, or keyword..."
                     // value={query}
@@ -56,7 +126,7 @@ export const JobSearch = () => {
                 {query && (
                     <button
                         type="button"
-                        // onClick={() => setQuery('')}
+                        onClick={() => setQuery("")}
                         className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-neutral-800"
                     >
                         <X className="h-4 w-4 text-neutral-400" />
@@ -97,7 +167,7 @@ export const JobSearch = () => {
                             <div>
                                 <h3 className="font-medium">{job.title}</h3>
                                 <div className="flex items-center gap-3 mt-1 text-sm text-neutral-400">
-                                    <span>{job.company}</span>
+                                    <span>{job.company.name}</span>
                                     <span className="flex items-center gap-1">
                                         <MapPin className="h-3 w-3" />
                                         {job.location}
@@ -107,7 +177,7 @@ export const JobSearch = () => {
                         </div>
                         <div className="text-right">
                             <span className="text-sm font-medium text-emerald-400">
-                                {job.match}% match
+                                {23}% match
                             </span>
                             <p className="text-xs text-neutral-500 mt-1">
                                 Relevance score

@@ -1,5 +1,3 @@
-"use client";
-
 import {
     MapPin,
     Building2,
@@ -9,40 +7,30 @@ import {
     RefreshCw,
     Filter,
 } from "lucide-react";
-
-// TODO: Create and import useFetch hook
-// import { useFetch } from '@/hooks/use-fetch'
-
-// TODO: Use the hook
-// const { data: jobs, loading, error, refetch } = useFetch<Job[]>('/api/jobs')
+import { useCallback } from "react";
+import { getJob, getJobs, type Job } from "@/lib/api";
+import { LoadingSkeleton } from "../../shared-components/loading-skeleton";
+import { ErrorFallback } from "../../shared-components/error-fallback";
+import { useQuery } from "../use-fetch";
 
 export const JobListWithHook = () => {
-    // Static placeholder - replace with useFetch hook
-    const jobs = [
-        {
-            id: "1",
-            title: "Senior Frontend Developer",
-            company: { name: "TechCorp", logo: "/placeholder.svg?height=40&width=40" },
-            location: "San Francisco, CA",
-            type: "Full-time",
-            salary: { min: 150000, max: 200000 },
-            postedAt: "2 days ago",
-        },
-        {
-            id: "2",
-            title: "React Engineer",
-            company: { name: "StartupXYZ", logo: "/placeholder.svg?height=40&width=40" },
-            location: "Remote",
-            type: "Contract",
-            salary: { min: 120000, max: 160000 },
-            postedAt: "1 week ago",
-        },
-    ];
+    const { data: jobs, loading, error } = useQuery<Job[]>(getJobs);
 
-    const loading = false;
-    const error = null;
-    const refetch = () => console.log("TODO: Implement refetch");
+    const fetchSingleJob = useCallback(() => getJob(3), []);
 
+    const {
+        data: job,
+        loading: loadingJob,
+        error: jobError,
+    } = useQuery<Job>(fetchSingleJob);
+
+    console.log({ jobs, job, loadingJob, jobError });
+
+    if (loading) return <LoadingSkeleton />;
+
+    if (error) return <ErrorFallback error={error} />;
+
+    if (!jobs) return <div>No data available</div>;
     return (
         <div>
             {/* Header with Refetch */}
@@ -51,7 +39,7 @@ export const JobListWithHook = () => {
                     <h2 className="text-lg font-medium">Job Listings</h2>
                     <button
                         type="button"
-                        onClick={refetch}
+                        // onClick={refetch}
                         className="flex items-center gap-2 rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors"
                     >
                         <RefreshCw className="h-4 w-4" />
@@ -106,11 +94,13 @@ export const JobListWithHook = () => {
                                         <Clock className="h-4 w-4" />
                                         {job.type}
                                     </span>
-                                    <span className="flex items-center gap-1.5 text-emerald-400">
-                                        <DollarSign className="h-4 w-4" />$
-                                        {(job.salary.min / 1000).toFixed(0)}k - $
-                                        {(job.salary.max / 1000).toFixed(0)}k
-                                    </span>
+                                    {job.salary && (
+                                        <span className="flex items-center gap-1.5 text-emerald-400">
+                                            <DollarSign className="h-4 w-4" />$
+                                            {(job.salary.min / 1000).toFixed(0)}k - $
+                                            {(job.salary.max / 1000).toFixed(0)}k
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-3 mt-4">
@@ -149,7 +139,9 @@ export const JobListWithHook = () => {
                     </div>
                     <div>
                         <span className="text-neutral-500">Data:</span>
-                        <span className="ml-2 text-emerald-400">{jobs.length} items</span>
+                        <span className="ml-2 text-emerald-400">
+                            {jobs?.length || 0} items
+                        </span>
                     </div>
                     <div>
                         <span className="text-neutral-500">Refetch:</span>
